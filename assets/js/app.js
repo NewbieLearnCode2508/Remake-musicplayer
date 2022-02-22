@@ -1,6 +1,8 @@
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
+const PLAYER_STORAGE_KEY = 'MP3-musicplayer';
+
 const audio = $('#audio');
 const listSongs = $('.list-songs');
 const dashBoard = $('.dashboard');
@@ -25,6 +27,7 @@ const app = {
     isPlaying: false,
     isRepeat: false,
     isRandom: false,
+    config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
     songs: [
         {
             name: 'Cô thắm về làng',
@@ -117,6 +120,120 @@ const app = {
             img: './assets/img/Chưabaogiờ.png'
         },
     ],
+    setConfig: function(key, value) {
+        this.config[key] = value;
+        localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config));
+    },
+    loadConfig: function() {
+        this.isRandom = this.config.isRandom;
+        this.isRepeat = this.config.isRepeat;
+    },
+    handlEvents: function() {
+        //margin top list song
+        const _this = this;
+        cdThumAnimate.pause();
+        window.onload = ()=> {
+            listSongs.style.marginTop = dashBoard.clientHeight + "px";
+            _this.activePlayingSong();
+        }
+        const cdWidth = cd.offsetWidth;
+        document.onscroll = ()=> {
+            const scrollApp = document.documentElement.scrollTop || window.scrollY;
+            const newWidth = cdWidth - scrollApp;
+            if (newWidth > 0) {
+                cd.style.width = newWidth + 'px';
+                cd.style.opacity = (newWidth / cdWidth);
+            }else {
+                cd.style.width = 0 + 'px';
+            }
+        }
+
+        playBtn.onclick = ()=> {
+            playBtn.classList.toggle('active');
+            _this.isPlaying = !_this.isPlaying;
+            if(_this.isPlaying) {
+                _this.playSong();
+            }else {
+                _this.pauseSong();
+            }
+        }
+
+        //Handle next button
+        nextBtn.onclick = ()=> {
+            if(_this.isRandom) {
+                _this.mixSong();
+            }else {
+                _this.nextSong();
+            }
+            _this.loadCurrentSong();
+            _this.playSong();
+        }
+
+        //Handle previous button
+        prevBtn.onclick = ()=> {
+            if(_this.isRandom) {
+                _this.mixSong();
+            }else {
+                this.prevSong();
+            }
+            _this.loadCurrentSong();
+            _this.playSong();
+        }
+
+        //Handle progress
+        audio.ontimeupdate = ()=> {
+            if(audio.duration) {
+                const progressPercent =  (audio.currentTime / audio.duration) * 100;
+                progress.value = progressPercent;
+                progressLine.style.width = progressPercent + "%";
+            }
+        }
+
+        progress.oninput = ()=> {
+            progressLine.style.width = progress.value + "%";
+            audio.currentTime = progress.value * (audio.duration / 100);
+            _this.playSong();
+        }
+        
+        //Handle repeat song
+        repeatBtn.onclick = ()=> {
+            this.isRepeat = !this.isRepeat;
+            repeatBtn.classList.toggle('active');
+            _this.setConfig('isRepeat', _this.isRepeat);
+        }
+
+        //Handle random song
+        randBtn.onclick = ()=> {
+            this.isRandom = !this.isRandom;
+            randBtn.classList.toggle('active');
+            _this.setConfig('isRandom', _this.isRandom);
+        }
+
+        audio.onended = ()=> {
+            progress.value = 0;
+            progressLine.style.width = 0;
+            if(_this.isRepeat) {
+                _this.repeatSong();
+            }else if(_this.isRandom) {
+                _this.mixSong();
+            }else {
+                nextBtn.click();
+            }
+            _this.loadCurrentSong();
+            audio.play();
+        }
+
+        //Select song
+        listSongs.onclick = (e)=> {
+            const songNode = e.target.closest('.song-item:not(active)');
+            if(songNode) {
+                _this.currentIndex = Number(songNode.getAttribute('data-index'));
+                _this.loadCurrentSong();
+                _this.playSong();
+                _this.activePlayingSong();
+            }
+        }
+    },
     loadCurrentSong: function() {
         cdThumb.style.background = 'url(' + this.songs[this.currentIndex].img + ') top center / cover no-repeat';
         audio.src = this.songs[this.currentIndex].path;
@@ -195,114 +312,14 @@ const app = {
             });
         }, 500);
     },
-    handlEvents: function() {
-        //margin top list song
-        const _this = this;
-        cdThumAnimate.pause();
-        window.onload = ()=> {
-            listSongs.style.marginTop = dashBoard.clientHeight + "px";
-            _this.activePlayingSong();
-        }
-        const cdWidth = cd.offsetWidth;
-        document.onscroll = ()=> {
-            const scrollApp = document.documentElement.scrollTop || window.scrollY;
-            const newWidth = cdWidth - scrollApp;
-            if (newWidth > 0) {
-                cd.style.width = newWidth + 'px';
-                cd.style.opacity = (newWidth / cdWidth);
-            }else {
-                cd.style.width = 0 + 'px';
-            }
-        }
-
-        playBtn.onclick = ()=> {
-            playBtn.classList.toggle('active');
-            _this.isPlaying = !_this.isPlaying;
-            if(_this.isPlaying) {
-                _this.playSong();
-            }else {
-                _this.pauseSong();
-            }
-        }
-
-        //Handle next button
-        nextBtn.onclick = ()=> {
-            if(_this.isRandom) {
-                _this.mixSong();
-            }else {
-                _this.nextSong();
-            }
-            _this.loadCurrentSong();
-            _this.playSong();
-        }
-
-        //Handle previous button
-        prevBtn.onclick = ()=> {
-            if(_this.isRandom) {
-                _this.mixSong();
-            }else {
-                this.prevSong();
-            }
-            _this.loadCurrentSong();
-            _this.playSong();
-        }
-
-        //Handle progress
-        audio.ontimeupdate = ()=> {
-            if(audio.duration) {
-                const progressPercent =  (audio.currentTime / audio.duration) * 100;
-                progress.value = progressPercent;
-                progressLine.style.width = progressPercent + "%";
-            }
-        }
-
-        progress.oninput = ()=> {
-            progressLine.style.width = progress.value + "%";
-            audio.currentTime = progress.value * (audio.duration / 100);
-            _this.playSong();
-        }
-        
-        //Handle repeat song
-        repeatBtn.onclick = ()=> {
-            this.isRepeat = !this.isRepeat;
-            repeatBtn.classList.toggle('active');
-        }
-
-        //Handle random song
-        randBtn.onclick = ()=> {
-            this.isRandom = !this.isRandom;
-            randBtn.classList.toggle('active');
-        }
-
-        audio.onended = ()=> {
-            progress.value = 0;
-            progressLine.style.width = 0;
-            if(_this.isRepeat) {
-                _this.repeatSong();
-            }else if(_this.isRandom) {
-                _this.mixSong();
-            }else {
-                nextBtn.click();
-            }
-            _this.loadCurrentSong();
-            audio.play();
-        }
-
-        //Select song
-        listSongs.onclick = (e)=> {
-            const songNode = e.target.closest('.song-item:not(active)');
-            if(songNode) {
-                _this.currentIndex = Number(songNode.getAttribute('data-index'));
-                _this.loadCurrentSong();
-                _this.playSong();
-                _this.activePlayingSong();
-            }
-        }
-    },
     start: function() {
+        this.loadConfig();
         this.renderSong();
         this.loadCurrentSong();
         this.handlEvents();
+
+        randBtn.classList.toggle('active', this.isRandom);
+        repeatBtn.classList.toggle('active', this.isRepeat);
     }
 }
 
