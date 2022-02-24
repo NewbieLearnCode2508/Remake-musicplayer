@@ -2,6 +2,7 @@
 :root {
     --white-color: #fff;
     --primary-color: #00CC99;
+    --black-color: #000;
 }
 
 .btn-active {
@@ -214,4 +215,42 @@
     padding: 16px 12px;
     font-size: 2rem;
     cursor: pointer;
+}
+
+/* Volume */
+.volume {
+    margin-top: 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.volume-icon {
+    padding: 2px;
+    margin-right: 8px;
+}
+
+.volume-off {
+    display: none;
+}
+
+.volume-on,
+.volume-off {
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--black-color);
+    transition: 0.2s;
+}
+
+.volume-on:active,
+.volume-off:active {
+    color: var(--primary-color);
+}
+
+.volume-icon.off .volume-on {
+    display: none;
+}
+
+.volume-icon.off .volume-off {
+    display: block;
 }

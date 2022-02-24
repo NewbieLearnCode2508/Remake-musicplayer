@@ -15,6 +15,8 @@ const progress = $('.progress');
 const progressLine = $('.progress-line');
 const repeatBtn = $('.repeat-btn');
 const randBtn = $('.rand-btn');
+const toggleVolume = $('.volume-icon');
+const volumeValue = $('#volume');
 const cdThumAnimate = cdThumb.animate([
     {transform: 'rotate(360deg)'}
 ], {
@@ -27,6 +29,7 @@ const app = {
     isPlaying: false,
     isRepeat: false,
     isRandom: false,
+    isMuteVolume: false,
     config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
     songs: [
         {
@@ -232,6 +235,25 @@ const app = {
                 _this.playSong();
                 _this.activePlayingSong();
             }
+        }
+
+        //Volume setting
+        toggleVolume.onclick = ()=> {
+            _this.isMuteVolume = !_this.isMuteVolume;
+            if(_this.isMuteVolume) {
+                console.log("tat am");
+                audio.muted = true;
+            }else {
+                console.log("mo am");
+                audio.muted = false;
+            }
+            toggleVolume.classList.toggle('off');
+            console.log(_this.isMuteVolume);
+        }
+
+        volumeValue.oninput = ()=> {
+            audio.volume = volumeValue.value / 100;
+            console.log(volumeValue.value, audio.volume);
         }
     },
     loadCurrentSong: function() {
