@@ -240,6 +240,7 @@ const app = {
         //Volume setting
         toggleVolume.onclick = ()=> {
             _this.isMuteVolume = !_this.isMuteVolume;
+            _this.setConfig('isMuteVolume', _this.isMuteVolume);
             if(_this.isMuteVolume) {
                 console.log("tat am");
                 audio.muted = true;
@@ -248,12 +249,10 @@ const app = {
                 audio.muted = false;
             }
             toggleVolume.classList.toggle('off');
-            console.log(_this.isMuteVolume);
         }
 
         volumeValue.oninput = ()=> {
             audio.volume = volumeValue.value / 100;
-            console.log(volumeValue.value, audio.volume);
         }
     },
     loadCurrentSong: function() {
@@ -342,6 +341,7 @@ const app = {
 
         randBtn.classList.toggle('active', this.isRandom);
         repeatBtn.classList.toggle('active', this.isRepeat);
+        toggleVolume.classList.toggle('off', this.isMuteVolume);
     }
 }
 
