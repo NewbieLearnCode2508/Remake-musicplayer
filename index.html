@@ -52,7 +52,18 @@
             </div>
             <audio src="./assets/song/Chua bao giờ.mp3" id="audio"></audio>
         </div>
-        <div class="list-songs"></div>
+        <div class="list-songs">
+            <div data-index="${index}" class="song-item">
+                <div style="background: url(${song.img}) top center / cover no-repeat;" class="song-img"></div>
+                <div class="song-info">
+                    <h2 class="song-name">${song.name}</h2>
+                    <h4 class="song-singer">${song.singer}</h4>
+                </div>
+                <div class="song-option">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="./assets/js/app.js"></script>
 </body>
